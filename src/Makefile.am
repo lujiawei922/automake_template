@@ -11,7 +11,10 @@ app_CFLAGS= \
 app_SOURCES= \
 	main.c
 #所需要依赖的库
-app_LDADD= \
-	./ModuleA/core/libmodulea.a \
-	./ModuleB/core/libmoduleb.a
+#app_LDADD= \
+	./ModuleA/core/libmodulea.so \
+	./ModuleB/core/libmoduleb.so
 
+app_LDFLAGS = \
+	-L./ModuleA/core/ -lmodulea \
+	-L./ModuleB/core/ -lmoduleb 

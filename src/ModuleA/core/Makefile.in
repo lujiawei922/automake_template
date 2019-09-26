@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -86,27 +87,26 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+mylib_PROGRAMS = libmodulea.so$(EXEEXT)
 subdir = src/ModuleA/core
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
+DIST_COMMON = $(srcdir)/Makefile.am $(include_HEADERS) \
+	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
-ARFLAGS = cru
-AM_V_AR = $(am__v_AR_@AM_V@)
-am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
-am__v_AR_0 = @echo "  AR      " $@;
-am__v_AR_1 = 
-libmodulea_a_AR = $(AR) $(ARFLAGS)
-libmodulea_a_LIBADD =
-am_libmodulea_a_OBJECTS = libmodulea_a-coreA.$(OBJEXT) \
-	libmodulea_a-shellA.$(OBJEXT)
-libmodulea_a_OBJECTS = $(am_libmodulea_a_OBJECTS)
+am__installdirs = "$(DESTDIR)$(mylibdir)" "$(DESTDIR)$(includedir)"
+PROGRAMS = $(mylib_PROGRAMS)
+am_libmodulea_so_OBJECTS = libmodulea_so-coreA.$(OBJEXT) \
+	libmodulea_so-shellA.$(OBJEXT)
+libmodulea_so_OBJECTS = $(am_libmodulea_so_OBJECTS)
+libmodulea_so_LDADD = $(LDADD)
+libmodulea_so_LINK = $(CCLD) $(libmodulea_so_CFLAGS) $(CFLAGS) \
+	$(libmodulea_so_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -122,8 +122,8 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/libmodulea_a-coreA.Po \
-	./$(DEPDIR)/libmodulea_a-shellA.Po
+am__depfiles_remade = ./$(DEPDIR)/libmodulea_so-coreA.Po \
+	./$(DEPDIR)/libmodulea_so-shellA.Po
 am__mv = mv -f
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -141,13 +141,41 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libmodulea_a_SOURCES)
-DIST_SOURCES = $(libmodulea_a_SOURCES)
+SOURCES = $(libmodulea_so_SOURCES)
+DIST_SOURCES = $(libmodulea_so_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -172,7 +200,6 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
-AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -208,7 +235,6 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -217,7 +243,6 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -256,11 +281,22 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libmodulea.a
-libmodulea_a_CFLAGS = -I../include
-libmodulea_a_SOURCES = \
+mylibdir = $(libdir)
+#依赖的头文件路径
+libmodulea_so_CFLAGS = \
+	-I../include
+
+#依赖打源文件
+libmodulea_so_SOURCES = \
 	coreA.c \
 	shellA.c
+
+#gcc动态编译
+libmodulea_so_LDFLAGS = -shared -fPIC
+myincludedir = $(includedir)
+include_HEADERS = \
+	../include/coreA.h \
+	../include/shellA.h
 
 all: all-am
 
@@ -295,14 +331,52 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+install-mylibPROGRAMS: $(mylib_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	@list='$(mylib_PROGRAMS)'; test -n "$(mylibdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(mylibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(mylibdir)" || exit 1; \
+	fi; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p \
+	  ; then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' \
+	    -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	      echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(mylibdir)$$dir'"; \
+	      $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(mylibdir)$$dir" || exit $$?; \
+	    } \
+	; done
 
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+uninstall-mylibPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(mylib_PROGRAMS)'; test -n "$(mylibdir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' \
+	`; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(mylibdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(mylibdir)" && rm -f $$files
 
-libmodulea.a: $(libmodulea_a_OBJECTS) $(libmodulea_a_DEPENDENCIES) $(EXTRA_libmodulea_a_DEPENDENCIES) 
-	$(AM_V_at)-rm -f libmodulea.a
-	$(AM_V_AR)$(libmodulea_a_AR) libmodulea.a $(libmodulea_a_OBJECTS) $(libmodulea_a_LIBADD)
-	$(AM_V_at)$(RANLIB) libmodulea.a
+clean-mylibPROGRAMS:
+	-test -z "$(mylib_PROGRAMS)" || rm -f $(mylib_PROGRAMS)
+
+libmodulea.so$(EXEEXT): $(libmodulea_so_OBJECTS) $(libmodulea_so_DEPENDENCIES) $(EXTRA_libmodulea_so_DEPENDENCIES) 
+	@rm -f libmodulea.so$(EXEEXT)
+	$(AM_V_CCLD)$(libmodulea_so_LINK) $(libmodulea_so_OBJECTS) $(libmodulea_so_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -310,8 +384,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmodulea_a-coreA.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmodulea_a-shellA.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmodulea_so-coreA.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmodulea_so-shellA.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -333,33 +407,54 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-libmodulea_a-coreA.o: coreA.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -MT libmodulea_a-coreA.o -MD -MP -MF $(DEPDIR)/libmodulea_a-coreA.Tpo -c -o libmodulea_a-coreA.o `test -f 'coreA.c' || echo '$(srcdir)/'`coreA.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_a-coreA.Tpo $(DEPDIR)/libmodulea_a-coreA.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='coreA.c' object='libmodulea_a-coreA.o' libtool=no @AMDEPBACKSLASH@
+libmodulea_so-coreA.o: coreA.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -MT libmodulea_so-coreA.o -MD -MP -MF $(DEPDIR)/libmodulea_so-coreA.Tpo -c -o libmodulea_so-coreA.o `test -f 'coreA.c' || echo '$(srcdir)/'`coreA.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_so-coreA.Tpo $(DEPDIR)/libmodulea_so-coreA.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='coreA.c' object='libmodulea_so-coreA.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -c -o libmodulea_a-coreA.o `test -f 'coreA.c' || echo '$(srcdir)/'`coreA.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -c -o libmodulea_so-coreA.o `test -f 'coreA.c' || echo '$(srcdir)/'`coreA.c
 
-libmodulea_a-coreA.obj: coreA.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -MT libmodulea_a-coreA.obj -MD -MP -MF $(DEPDIR)/libmodulea_a-coreA.Tpo -c -o libmodulea_a-coreA.obj `if test -f 'coreA.c'; then $(CYGPATH_W) 'coreA.c'; else $(CYGPATH_W) '$(srcdir)/coreA.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_a-coreA.Tpo $(DEPDIR)/libmodulea_a-coreA.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='coreA.c' object='libmodulea_a-coreA.obj' libtool=no @AMDEPBACKSLASH@
+libmodulea_so-coreA.obj: coreA.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -MT libmodulea_so-coreA.obj -MD -MP -MF $(DEPDIR)/libmodulea_so-coreA.Tpo -c -o libmodulea_so-coreA.obj `if test -f 'coreA.c'; then $(CYGPATH_W) 'coreA.c'; else $(CYGPATH_W) '$(srcdir)/coreA.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_so-coreA.Tpo $(DEPDIR)/libmodulea_so-coreA.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='coreA.c' object='libmodulea_so-coreA.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -c -o libmodulea_a-coreA.obj `if test -f 'coreA.c'; then $(CYGPATH_W) 'coreA.c'; else $(CYGPATH_W) '$(srcdir)/coreA.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -c -o libmodulea_so-coreA.obj `if test -f 'coreA.c'; then $(CYGPATH_W) 'coreA.c'; else $(CYGPATH_W) '$(srcdir)/coreA.c'; fi`
 
-libmodulea_a-shellA.o: shellA.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -MT libmodulea_a-shellA.o -MD -MP -MF $(DEPDIR)/libmodulea_a-shellA.Tpo -c -o libmodulea_a-shellA.o `test -f 'shellA.c' || echo '$(srcdir)/'`shellA.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_a-shellA.Tpo $(DEPDIR)/libmodulea_a-shellA.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shellA.c' object='libmodulea_a-shellA.o' libtool=no @AMDEPBACKSLASH@
+libmodulea_so-shellA.o: shellA.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -MT libmodulea_so-shellA.o -MD -MP -MF $(DEPDIR)/libmodulea_so-shellA.Tpo -c -o libmodulea_so-shellA.o `test -f 'shellA.c' || echo '$(srcdir)/'`shellA.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_so-shellA.Tpo $(DEPDIR)/libmodulea_so-shellA.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shellA.c' object='libmodulea_so-shellA.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -c -o libmodulea_a-shellA.o `test -f 'shellA.c' || echo '$(srcdir)/'`shellA.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -c -o libmodulea_so-shellA.o `test -f 'shellA.c' || echo '$(srcdir)/'`shellA.c
 
-libmodulea_a-shellA.obj: shellA.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -MT libmodulea_a-shellA.obj -MD -MP -MF $(DEPDIR)/libmodulea_a-shellA.Tpo -c -o libmodulea_a-shellA.obj `if test -f 'shellA.c'; then $(CYGPATH_W) 'shellA.c'; else $(CYGPATH_W) '$(srcdir)/shellA.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_a-shellA.Tpo $(DEPDIR)/libmodulea_a-shellA.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shellA.c' object='libmodulea_a-shellA.obj' libtool=no @AMDEPBACKSLASH@
+libmodulea_so-shellA.obj: shellA.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -MT libmodulea_so-shellA.obj -MD -MP -MF $(DEPDIR)/libmodulea_so-shellA.Tpo -c -o libmodulea_so-shellA.obj `if test -f 'shellA.c'; then $(CYGPATH_W) 'shellA.c'; else $(CYGPATH_W) '$(srcdir)/shellA.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmodulea_so-shellA.Tpo $(DEPDIR)/libmodulea_so-shellA.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shellA.c' object='libmodulea_so-shellA.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_a_CFLAGS) $(CFLAGS) -c -o libmodulea_a-shellA.obj `if test -f 'shellA.c'; then $(CYGPATH_W) 'shellA.c'; else $(CYGPATH_W) '$(srcdir)/shellA.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmodulea_so_CFLAGS) $(CFLAGS) -c -o libmodulea_so-shellA.obj `if test -f 'shellA.c'; then $(CYGPATH_W) 'shellA.c'; else $(CYGPATH_W) '$(srcdir)/shellA.c'; fi`
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -448,8 +543,11 @@ distdir-am: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(PROGRAMS) $(HEADERS)
 installdirs:
+	for dir in "$(DESTDIR)$(mylibdir)" "$(DESTDIR)$(includedir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -482,11 +580,11 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-mylibPROGRAMS mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/libmodulea_a-coreA.Po
-	-rm -f ./$(DEPDIR)/libmodulea_a-shellA.Po
+		-rm -f ./$(DEPDIR)/libmodulea_so-coreA.Po
+	-rm -f ./$(DEPDIR)/libmodulea_so-shellA.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -503,7 +601,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS install-mylibPROGRAMS
 
 install-dvi: install-dvi-am
 
@@ -532,8 +630,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/libmodulea_a-coreA.Po
-	-rm -f ./$(DEPDIR)/libmodulea_a-shellA.Po
+		-rm -f ./$(DEPDIR)/libmodulea_so-coreA.Po
+	-rm -f ./$(DEPDIR)/libmodulea_so-shellA.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -549,28 +647,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-includeHEADERS uninstall-mylibPROGRAMS
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
-	clean-generic clean-noinstLIBRARIES cscopelist-am ctags \
-	ctags-am distclean distclean-compile distclean-generic \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
+	clean-generic clean-mylibPROGRAMS cscopelist-am ctags ctags-am \
+	distclean distclean-compile distclean-generic distclean-tags \
+	distdir dvi dvi-am html html-am info info-am install \
+	install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am
+	install-html-am install-includeHEADERS install-info \
+	install-info-am install-man install-mylibPROGRAMS install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-includeHEADERS uninstall-mylibPROGRAMS
 
 .PRECIOUS: Makefile
 
-#include_HEADERS= \
-#	../include/coreA.h \
-#	../include/shellA.h 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

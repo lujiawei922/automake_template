@@ -101,10 +101,9 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_app_OBJECTS = app-main.$(OBJEXT)
 app_OBJECTS = $(am_app_OBJECTS)
-app_DEPENDENCIES = ./ModuleA/core/libmodulea.a \
-	./ModuleB/core/libmoduleb.a
-app_LINK = $(CCLD) $(app_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o \
-	$@
+app_LDADD = $(LDADD)
+app_LINK = $(CCLD) $(app_CFLAGS) $(CFLAGS) $(app_LDFLAGS) $(LDFLAGS) \
+	-o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -211,7 +210,6 @@ am__relativize = \
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
-AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -247,7 +245,6 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -256,7 +253,6 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -295,17 +291,25 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+
+#照例添加对应子目录
 SUBDIRS = ModuleA/core ModuleB/core
+#依赖的头文件路径
 app_CFLAGS = \
 	-I./ModuleA/include \
 	-I./ModuleB/include
 
+#依赖的源文件
 app_SOURCES = \
 	main.c
 
-app_LDADD = \
-	./ModuleA/core/libmodulea.a \
-	./ModuleB/core/libmoduleb.a
+#所需要依赖的库
+#app_LDADD= \
+#	./ModuleA/core/libmodulea.so \
+#	./ModuleB/core/libmoduleb.so
+app_LDFLAGS = \
+	-L./ModuleA/core/ -lmodulea \
+	-L./ModuleB/core/ -lmoduleb 
 
 all: all-recursive
 
